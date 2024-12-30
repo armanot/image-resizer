@@ -4,8 +4,9 @@ from PIL import Image
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
-# Configuration
 app = Flask(__name__)
+
+# Configuration
 UPLOAD_FOLDER = "uploads"
 DEST_FOLDER = "resized"
 PDF_FILE = "resized_images.pdf"
@@ -14,6 +15,10 @@ TARGET_HEIGHT = 600
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DEST_FOLDER, exist_ok=True)
+
+@app.route("/")
+def home():
+    return jsonify({"message": "Image Resizer Backend is Running!"})
 
 @app.route("/resize", methods=["POST"])
 def resize_images():
@@ -48,3 +53,4 @@ def resize_images():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
