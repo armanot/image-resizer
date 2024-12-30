@@ -1,40 +1,50 @@
 from flask import Flask, request, jsonify
-from werkzeug.utils import secure_filename
 import os
 from PIL import Image
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
+# Configuration
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
-PDF_OUTPUT = "output.pdf"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+DEST_FOLDER = "resized"
+PDF_FILE = "resized_images.pdf"
+TARGET_WIDTH = 800
+TARGET_HEIGHT = 600
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(DEST_FOLDER, exist_ok=True)
 
-@app.route("/upload", methods=["POST"])
-def upload_image():
-    file = request.files["file"]
-    if file:
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(file_path)
+@app.route("/resize", methods=["POST"])
+def resize_images():
+    uploaded_files = request.files.getlist("images")
+    if not uploaded_files:
+        return jsonify({"error": "No files provided"}), 400
 
-        # Resize image and save it back
-        resized_path = os.path.join(app.config["UPLOAD_FOLDER"], f"resized-{filename}")
-        with Image.open(file_path) as img:
-            img = img.resize((800, 600), Image.LANCZOS)
-            img.save(resized_path)
+    report = []
+    pdf = canvas.Canvas(PDF_FILE, pagesize=letter)
+    pdf.setTitle("Resized Images")
 
-        # Generate a PDF
-        pdf = canvas.Canvas(PDF_OUTPUT, pagesize=letter)
-        pdf.drawImage(resized_path, 50, 500, width=400, height=300)
-        pdf.save()
+    for uploaded_file in uploaded_files:
+        try:
+            file_path = os.path.join(UPLOAD_FOLDER, uploaded_file.filename)
+            resized_path = os.path.join(DEST_FOLDER, uploaded_file.filename)
+            uploaded_file.save(file_path)
 
-        return jsonify({"message": "File uploaded and processed successfully!", "fileUrl": resized_path})
+            with Image.open(file_path) as img:
+                img = img.resize((TARGET_WIDTH, TARGET_HEIGHT), Image.LANCZOS)
+                img.save(resized_path)
 
-    return jsonify({"error": "No file provided!"}), 400
+            # Add resized image to PDF
+            pdf.drawImage(resized_path, 50, 500, width=400, height=300)
+            pdf.showPage()
+
+            report.append({"file": uploaded_file.filename, "status": "resized"})
+        except Exception as e:
+            report.append({"file": uploaded_file.filename, "status": f"error: {str(e)}"})
+
+    pdf.save()
+    return jsonify({"message": "Resizing complete", "report": report})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
