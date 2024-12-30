@@ -1,0 +1,2 @@
+imgur client_id: b359a6736ccbf0b
+imgur client_secret: 3554021947bdd0af1905a90ff580d82b655a8f48

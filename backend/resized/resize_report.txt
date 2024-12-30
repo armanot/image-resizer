@@ -1,0 +1,6 @@
+Resize Report
+=======================
+Source: F:\image-resizer\backend\uploads\resized-image.jpg, Resized: F:\image-resizer\backend\resized\resized-image.jpg
+Source: F:\image-resizer\backend\uploads\resized-resized-image.jpg, Resized: F:\image-resizer\backend\resized\resized-resized-image.jpg
+PDF saved to F:\image-resizer\backend\resized\resized_images.pdf
+All images processed successfully.
