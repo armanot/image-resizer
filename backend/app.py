@@ -13,7 +13,7 @@ DEST_FOLDER = "resized"
 PDF_FILE = "resized_images.pdf"
 TARGET_WIDTH = 800
 TARGET_HEIGHT = 600
-IMGUR_CLIENT_ID = "b359a6736ccbf0b"  # Replace with your Imgur Client ID
+IMGUR_ACCESS_TOKEN = "95979e5ca603a0e701ed51c5ceca039c9e3441b7"  # Replace with your Imgur Access Token
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DEST_FOLDER, exist_ok=True)
@@ -25,9 +25,8 @@ def home():
 
 def upload_to_imgur(file_path):
     url = "https://api.imgur.com/3/upload"
-    headers = {"Authorization": f"Client-ID {IMGUR_CLIENT_ID}"}
+    headers = {"Authorization": f"Bearer {IMGUR_ACCESS_TOKEN}"}
     with open(file_path, "rb") as file:
-        data = {"image": file.read()}
         response = requests.post(url, headers=headers, files={"image": file})
     
     if response.status_code == 200:
@@ -73,4 +72,5 @@ def resize_images():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
 
